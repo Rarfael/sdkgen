@@ -8,14 +8,8 @@ import { BaseFeature } from '../base/BaseFeature'
 const S_NOT_FOUND = 'Not found'
 
 
-// Which param is entity X's own identifier, as opposed to a parent key —
-// the load op's canonical point's LAST path segment, by construction (a
-// route addresses parents first, the record last). Mirrors recordKey in
-// sdkgen's Main_seneca-provider.ts; written again here because a template
-// ships standalone, outside that package. A renamed id (e.g. Airtable's
-// record_id) needs its own seeded field: matching only ever happens
-// against the API's real param names, never a bare 'id' the API itself
-// does not use.
+// Entity X's own identifier param (vs. a parent key): the load op's
+// canonical point's LAST path segment. Mirrors recordKey in Main_seneca-provider.ts.
 function ownIdField(config: any, getpath: any, entityName: string): string {
   for (const opname of ['load', 'remove', 'update']) {
     const points = getpath(config, ['entity', entityName, 'op', opname, 'points']) || []
@@ -208,10 +202,8 @@ class TestFeature extends BaseFeature {
         const ent = clone(ctx.reqdata)
         setprop(ent, 'id', id)
 
-        // A record created during the run needs the same real-key seeding
-        // the initial walk gives seed data (see ownIdField above) — without
-        // it, only `id` is set, and a load by the entity's own key right
-        // after create (recordKey !== 'id') finds nothing.
+        // A newly-created record needs the same real-key seeding as the
+        // initial walk, or a load by the entity's own key finds nothing.
         const idField = ownIdField(ctx.config, struct.getpath, getprop(op, 'entity'))
         if ('id' !== idField && null == getprop(ent, idField)) {
           setprop(ent, idField, id)

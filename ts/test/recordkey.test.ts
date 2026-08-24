@@ -1,6 +1,5 @@
-// recordKey is a COMPONENT: it imports real @voxgig/sdkgen and
-// @voxgig/apidef helpers via node_modules (no local sibling files, so no
-// shims needed) and is transpiled + driven directly here.
+// recordKey is a COMPONENT: transpiled + driven directly against real
+// @voxgig/sdkgen and @voxgig/apidef via node_modules.
 
 import { test, describe } from 'node:test'
 import { strictEqual } from 'node:assert'
@@ -16,7 +15,7 @@ import { transform } from 'sucrase'
 // from inside this repo's own tests — point it at the local build instead.
 const SHIMS: Record<string, any> = {
   '@voxgig/sdkgen': require('../dist/sdkgen.js'),
-  // Local siblings unrelated to recordKey — stubbed out entirely.
+  // Local siblings unrelated to recordKey — stubbed out.
   './Extras_seneca-provider': { Tests: () => { }, Scripts: () => { }, Workflow: () => { }, Readme: () => { }, Docs: () => { } },
   './Gitignore_seneca-provider': { Gitignore: () => { } },
 }
