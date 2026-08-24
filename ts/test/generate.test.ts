@@ -905,10 +905,8 @@ describe('generate', () => {
   })
 
 
-  // ts: an entity named `record` (Airtable's real shape) produced `export
-  // interface Record {...}` with a field typed `Record<string, any>` —
-  // canonToType's own generic-object mapping — in the SAME interface,
-  // shadowing the TS builtin: "Type 'Record' is not generic".
+  // Airtable's `record` entity shadowed the TS builtin Record<K,V>: "Type
+  // 'Record' is not generic".
   test('ts: an entity named record does not shadow the builtin Record<K,V>', async () => {
     const out = await generate(['ts'])
 
