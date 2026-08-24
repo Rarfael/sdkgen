@@ -153,15 +153,8 @@ function unwrapListData(data: any): any[] | null {
 })
 
 
-// GraphQL-backed op: a REST-shaped direct() call (GET, params in the URL)
-// cannot reach it — every op, including list, synthesizes POST with the
-// query/variables as a JSON body, not URL params (see
-// MakeFetchDefUtility: spec.body only ever comes from an explicit `body`
-// field, never derived from `params`). apidef already built a real, valid
-// query or mutation document per point (point.graphql.doc, with variables
-// declared to match), so reuse that verbatim through the SDK's own
-// graphql() escape hatch instead of re-deriving a REST-shaped call that
-// cannot represent one.
+// GraphQL-backed op needs POST+body, not a REST-shaped GET+params direct()
+// call — reuse apidef's own point.graphql.doc via the SDK's graphql() hatch.
 function generateDirectGraphql(
   opname: 'load' | 'list',
   entity: ModelEntity,
@@ -192,10 +185,8 @@ function generateDirectGraphql(
     ? `    if (skipIfMissingIds(t, setup, ${JSON.stringify(liveIdKeys)})) return\n`
     : ''
 
-  // Asserted against the OUTGOING request body (what we sent), not the
-  // mocked response — response-shape correctness is the entity-level
-  // load/list tests' job; direct/graphql only has to prove the raw path
-  // reaches the endpoint with the right method and payload.
+  // Asserted against the OUTGOING request body, not the mocked response —
+  // response-shape correctness is the entity-level tests' job.
   const varAsserts = vars.map((_v: any, i: number) =>
     '      assert(calls[0].init.body.includes(\'direct0' + (i + 1) + '\'))\n').join('')
 
