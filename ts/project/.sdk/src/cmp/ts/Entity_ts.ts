@@ -33,9 +33,8 @@ const Entity = cmp(function Entity(props: any) {
 
   names(entrep, entity.Name, 'EntityName')
 
-  // A TS/JS global (Record, Array, Promise, ...) would shadow itself for
-  // the rest of the file — see tsSafeTypeName. The runtime `this.Name`
-  // string stays entity.Name; only the TYPE reference is ever renamed.
+  // Only the TYPE reference is renamed (see tsSafeTypeName); runtime
+  // `this.Name` stays entity.Name.
   const dataType = tsSafeTypeName(entity.Name)
 
   // Import exactly the typed models this entity references: its data type plus
