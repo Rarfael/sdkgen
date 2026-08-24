@@ -318,18 +318,8 @@ function phpSafeTypeName(Name: string): string {
 }
 
 
-// TypeScript GLOBAL TYPE NAMES — a fourth hazard, same shape as the Ruby and
-// Swift ones above but for TS/JS builtins, which are in scope everywhere
-// with no import. An entity named `Record` emitted `export interface Record
-// {...}` and canonToType's own generic-object mapping (`Record<string,
-// any>`) then resolved to that flat interface INSIDE THE SAME FILE instead
-// of the builtin: `error TS2315: Type 'Record' is not generic` — on a
-// field of the `Record` entity itself.
-//
-// Utility types (`Record`, `Partial`, ...) and common global constructors
-// (`Array`, `Map`, `Promise`, ...) that a REST entity name plausibly lands
-// on. Mirrors RB_CORE_CONSTANTS / SWIFT_SDK_TYPES: only real builtins are
-// listed, so a non-colliding SDK stays byte-identical to before.
+// TS/JS globals an entity name can shadow (e.g. `Record` broke canonToType's
+// own `Record<string, any>` mapping inside the same file).
 const TS_RESERVED_TYPES = new Set<string>([
   // utility types
   'Record', 'Partial', 'Required', 'Readonly', 'Pick', 'Omit', 'Exclude',
@@ -348,10 +338,8 @@ function isTsReservedType(Name: string): boolean {
 }
 
 
-// A collision-free TS type name for a generated type: unchanged, unless it
-// shadows a TS/JS global, in which case `Type` is appended (`Record` ->
-// `RecordType`). Mirrors rbSafeTypeName / swiftSafeTypeName. Applied ONLY
-// to the bare entity data type, for the same reason as both of those.
+// Collision-free TS type name (`Record` -> `RecordType`). Mirrors
+// rbSafeTypeName / swiftSafeTypeName; applied only to the bare entity data type.
 function tsSafeTypeName(Name: string): string {
   return isTsReservedType(Name) ? Name + 'Type' : Name
 }

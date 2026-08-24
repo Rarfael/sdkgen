@@ -67,26 +67,8 @@ function requiredKeys(ent: any, opname: string): string[] {
 }
 
 
-// The key that addresses ONE record.
-//
-// `entityIdField` answers whenever the model declares one, which apidef does
-// for any entity carrying a field literally named `id` — and it renames an
-// `<entity>_id` path param to `id` besides, which is why most APIs never reach
-// the fallback.
-//
-// When it does NOT answer, the record key is the LAST path param of the
-// op's own point, in PATH order — a route addresses parents first and the
-// record last, by construction. Without this the key was simply unknown,
-// so a param named `code` failed the `!== idf` test in opParentKeys and
-// was classified as a PARENT — `load$('SAVE20')` threw "coupon load: code
-// is required" instead of loading anything, and the entity was treated as
-// nested throughout.
-//
-// opParams(op) is NOT the source here: it alphabetizes params for output
-// stability, which loses path order on a 3+-param route — Airtable's
-// record (base_id, table_id, record_id) alphabetizes with table_id last,
-// so the old `params[params.length - 1]` picked the wrong parent as the
-// record's own key. The point's own `parts` still has the true order.
+// The key that addresses ONE record. Falls back to the LAST path param in
+// true PATH order (ownPoint's `parts`, not opParams' alphabetized list).
 function recordKey(ent: any): string {
   const idf = entityIdField(ent)
   if (null != idf && '' !== idf) {
