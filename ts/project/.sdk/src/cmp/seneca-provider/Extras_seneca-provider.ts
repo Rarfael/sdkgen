@@ -406,12 +406,8 @@ describe('${provider.fileBase}', () => {
 
 `)
 
-      // Every flat entity (no parent keys), not just one "subject" — a
-      // provider with two or more flat siblings used to leave every one
-      // but the busiest untested beyond the accessor check above. A bare
-      // `list$()`/`load$(id)` call has no way to carry a parent key, so
-      // entities that need one are covered by the `nested` block below
-      // instead, with their keys filled in.
+      // Every flat entity (no parent keys), not just one "subject" — entities
+      // needing a parent key are covered by the `nested` block below instead.
       const flat = provider.entities.filter((e: any) => 0 === e.parents.length)
 
       each(flat, (e: any) => {
@@ -423,9 +419,8 @@ describe('${provider.fileBase}', () => {
 
     assert.equal(list.length, 2)
 
-    // Entities must come back as Seneca entities under this plugin's canon.
-    // The SDK tags its own results with its entity marker, which must not
-    // survive into the Seneca entity.
+    // Must come back as a Seneca entity under this plugin's canon, not
+    // the SDK's own entity marker.
     assert.equal(
       list[0].canon$({ string: true }),
       'provider/${provider.lower}/${e.name}',
@@ -451,9 +446,8 @@ describe('${provider.fileBase}', () => {
   })
 
 
-  // A 404 from a single-item read is an ordinary "not found" answer, not a
-  // failure: the provider turns it into null rather than letting the SDK
-  // throw.
+  // A 404 is an ordinary "not found", not a failure — the provider turns
+  // it into null rather than letting the SDK throw.
   it('${e.name}-load-missing', async () => {
     const seneca = await makeSeneca()
     const missing = await seneca
@@ -470,10 +464,8 @@ describe('${provider.fileBase}', () => {
       // A nested entity cannot build its path without the parent id. That is
       // the mistake this target exists to make impossible, so pin it.
       each(nested, (e: any) => {
-        // EVERY parent key, not just the first. An entity nested two levels
-        // deep is guarded on both, so a test supplying only the alphabetically
-        // first tripped the second guard and failed on the code it was meant
-        // to be exercising.
+        // EVERY parent key, not just the first — a two-level-deep entity is
+        // guarded on both.
         const key = e.parents[0]
         const pairs = e.parents
           .map((k: string) => `${k}: '${parentSeed(e, k)}'`).join(', ')
