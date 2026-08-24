@@ -240,16 +240,8 @@ function seedRecord(e: any, idx: number): Record<string, any> {
       out[f.name] = `${e.name}${idx}`
     }
     else if (e.parents.includes(f.name)) {
-      // A nested entity's parent id must match a record the parent seeds, or
-      // the offline store answers nothing and every nested test reads as a
-      // false pass. Reuses parentSeed's fallback rather than f.parentEntity
-      // directly: when no entity in the model shares this key's name (the
-      // common case for a scoping param like `user_id` with no `user`
-      // entity, or a same-named response field that means something else
-      // entirely, like GitHub's `owner`), f.parentEntity is '' and seeding
-      // '0' desynced the record from every query built against the SAME
-      // key via parentSeed (parentPairs, crudTest, ...) — 0 results, or a
-      // seeded field asserted against the wrong literal.
+      // Reuse parentSeed's fallback so this stays in sync with every other
+      // query built against the same key (parentPairs, crudTest, ...).
       out[f.name] = parentSeed(e, f.name)
     }
     else if ('number' === f.kind) {
@@ -414,12 +406,8 @@ describe('${provider.fileBase}', () => {
 
 `)
 
-      // Every flat entity (no parent keys), not just one "subject" — a
-      // provider with two or more flat siblings used to leave every one
-      // but the busiest untested beyond the accessor check above. A bare
-      // `list$()`/`load$(id)` call has no way to carry a parent key, so
-      // entities that need one are covered by the `nested` block below
-      // instead, with their keys filled in.
+      // Every flat entity (no parent keys), not just one "subject" — entities
+      // needing a parent key are covered by the `nested` block below instead.
       const flat = provider.entities.filter((e: any) => 0 === e.parents.length)
 
       each(flat, (e: any) => {
@@ -431,9 +419,8 @@ describe('${provider.fileBase}', () => {
 
     assert.equal(list.length, 2)
 
-    // Entities must come back as Seneca entities under this plugin's canon.
-    // The SDK tags its own results with its entity marker, which must not
-    // survive into the Seneca entity.
+    // Must come back as a Seneca entity under this plugin's canon, not
+    // the SDK's own entity marker.
     assert.equal(
       list[0].canon$({ string: true }),
       'provider/${provider.lower}/${e.name}',
@@ -459,9 +446,8 @@ describe('${provider.fileBase}', () => {
   })
 
 
-  // A 404 from a single-item read is an ordinary "not found" answer, not a
-  // failure: the provider turns it into null rather than letting the SDK
-  // throw.
+  // A 404 is an ordinary "not found", not a failure — the provider turns
+  // it into null rather than letting the SDK throw.
   it('${e.name}-load-missing', async () => {
     const seneca = await makeSeneca()
     const missing = await seneca
@@ -478,20 +464,14 @@ describe('${provider.fileBase}', () => {
       // A nested entity cannot build its path without the parent id. That is
       // the mistake this target exists to make impossible, so pin it.
       each(nested, (e: any) => {
-        // EVERY parent key, not just the first. An entity nested two levels
-        // deep is guarded on both, so a test supplying only the alphabetically
-        // first tripped the second guard and failed on the code it was meant
-        // to be exercising.
+        // EVERY parent key, not just the first — a two-level-deep entity is
+        // guarded on both.
         const key = e.parents[0]
         const pairs = e.parents
           .map((k: string) => `${k}: '${parentSeed(e, k)}'`).join(', ')
 
-        // The guard is PER OP (Main's opParents), not a blanket property of
-        // the entity, so the op this test calls has to be one that actually
-        // requires `key` — hardcoding `list` assumed every nested entity's
-        // list is parent-scoped, which fails for e.g. an entity guarded on
-        // load/update/remove but whose list is unscoped (GitHub's `repo`:
-        // owner guards load, not list).
+        // The guard is PER OP (Main's opParents), so pick an op that
+        // actually requires `key` — not every op on a nested entity is scoped.
         const guardOp = ['list', 'load', 'update', 'remove']
           .find((op: string) => (e.opParents[op] || []).includes(key))
 

@@ -1,6 +1,5 @@
-// ownIdField is a TEMPLATE: it ships to users verbatim, outside sdkgen's own
-// tsconfig, so nothing here compiled or ran it before. This suite transpiles
-// the real shipped file and drives it directly.
+// ownIdField is a TEMPLATE (ships verbatim, outside sdkgen's own tsconfig) —
+// this suite transpiles the real shipped file and drives it directly.
 
 import { test, describe } from 'node:test'
 import { strictEqual } from 'node:assert'

@@ -236,11 +236,7 @@ main: kit: entity: history: {
 #               shadows it, and the example's own console.log then resolves
 #               to the entity: "console.log is not a function"
 #   record   -> the TS builtin generic Record<K,V>. export interface
-#               Record {...} shadows it for the rest of the file, so
-#               canonToType's own Record<string, any> (a generic-object
-#               field) breaks: "Type 'Record' is not generic" — found
-#               converting Airtable, whose record entity has exactly
-#               this shape.
+#               Record {...} shadows it: "Type 'Record' is not generic".
 #
 # The generator owns helpers for exactly this (safeVarName, isReservedName,
 # exampleVarName, entityClassName); these entities prove they are actually

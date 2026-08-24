@@ -1,6 +1,5 @@
-// seedRecord is a COMPONENT: it imports real @voxgig/sdkgen via node_modules
-// (no local sibling files, so no shims needed beyond the package itself) and
-// is transpiled + driven directly here.
+// seedRecord is a COMPONENT: transpiled + driven directly against real
+// @voxgig/sdkgen via node_modules.
 
 import { test, describe } from 'node:test'
 import { strictEqual } from 'node:assert'
