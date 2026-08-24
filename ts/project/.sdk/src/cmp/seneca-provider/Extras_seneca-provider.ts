@@ -240,16 +240,8 @@ function seedRecord(e: any, idx: number): Record<string, any> {
       out[f.name] = `${e.name}${idx}`
     }
     else if (e.parents.includes(f.name)) {
-      // A nested entity's parent id must match a record the parent seeds, or
-      // the offline store answers nothing and every nested test reads as a
-      // false pass. Reuses parentSeed's fallback rather than f.parentEntity
-      // directly: when no entity in the model shares this key's name (the
-      // common case for a scoping param like `user_id` with no `user`
-      // entity, or a same-named response field that means something else
-      // entirely, like GitHub's `owner`), f.parentEntity is '' and seeding
-      // '0' desynced the record from every query built against the SAME
-      // key via parentSeed (parentPairs, crudTest, ...) — 0 results, or a
-      // seeded field asserted against the wrong literal.
+      // Reuse parentSeed's fallback so this stays in sync with every other
+      // query built against the same key (parentPairs, crudTest, ...).
       out[f.name] = parentSeed(e, f.name)
     }
     else if ('number' === f.kind) {
@@ -483,12 +475,8 @@ describe('${provider.fileBase}', () => {
         const pairs = e.parents
           .map((k: string) => `${k}: '${parentSeed(e, k)}'`).join(', ')
 
-        // The guard is PER OP (Main's opParents), not a blanket property of
-        // the entity, so the op this test calls has to be one that actually
-        // requires `key` — hardcoding `list` assumed every nested entity's
-        // list is parent-scoped, which fails for e.g. an entity guarded on
-        // load/update/remove but whose list is unscoped (GitHub's `repo`:
-        // owner guards load, not list).
+        // The guard is PER OP (Main's opParents), so pick an op that
+        // actually requires `key` — not every op on a nested entity is scoped.
         const guardOp = ['list', 'load', 'update', 'remove']
           .find((op: string) => (e.opParents[op] || []).includes(key))
 
